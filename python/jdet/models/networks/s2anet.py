@@ -9,9 +9,9 @@ class S2ANet(nn.Module):
     """
     """
 
-    def __init__(self,backbone,neck=None,bbox_head=None):
+    def __init__(self,backbone,neck=None,bbox_head=None): # 需要指定backbone,neck,bbox-head
         super(S2ANet,self).__init__()
-        self.backbone = build_from_cfg(backbone,BACKBONES)
+        self.backbone = build_from_cfg(backbone,BACKBONES)  
         self.neck = build_from_cfg(neck,NECKS)
         self.bbox_head = build_from_cfg(bbox_head,HEADS)
 
@@ -27,10 +27,10 @@ class S2ANet(nn.Module):
         Rets:
             outputs: train mode will be losses val mode will be results
         '''
-        features = self.backbone(images)
+        features = self.backbone(images)  # resnet50
         
         if self.neck:
-            features = self.neck(features)
+            features = self.neck(features) # fpn
         
         outputs = self.bbox_head(features, targets)
         

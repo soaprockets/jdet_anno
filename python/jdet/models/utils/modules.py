@@ -114,27 +114,27 @@ class ConvModule(nn.Module):
         self.norm_cfg = norm_cfg
         self.act_cfg = act_cfg
         self.with_spectral_norm = with_spectral_norm
-        self.with_explicit_padding = padding_mode not in official_padding_mode
+        self.with_explicit_padding = padding_mode not in official_padding_mode # self.with_explicit_padding = True/False
         self.order = order
         assert isinstance(self.order, tuple) and len(self.order) == 3
         assert set(order) == set(['conv', 'norm', 'act'])
 
-        self.with_norm = norm_cfg is not None
+        self.with_norm = norm_cfg is not None # self.with_norm is bool value,如果norm_cfg非空，self.with_norm =True,
         self.with_activation = act_cfg is not None
         # if the conv layer is before a norm layer, bias is unnecessary.
         if bias == 'auto':
-            bias = not self.with_norm
+            bias = not self.with_norm #如果bias='auto',自动设置bias为False，即卷积层在normlayer之前，bias可以不需要。conv(bias=False)
         self.with_bias = bias
-
+        # norm 和 bias不要同时存在
         if self.with_norm and self.with_bias:
             warnings.warn('ConvModule has norm and bias at the same time')
 
-        if self.with_explicit_padding:
+        if self.with_explicit_padding: # padding_mode is not in official_padding_mode
             pad_cfg = dict(type=padding_mode)
             self.padding_layer = build_from_cfg(pad_cfg,BRICKS, padding=padding)
 
         # reset padding to 0 for conv module
-        conv_padding = 0 if self.with_explicit_padding else padding
+        conv_padding = 0 if self.with_explicit_padding else padding # 如果padding_mode不在official_padding_mode中，padding设置为0，否则conv_padding=padding(用户传递进来的参数)
         # build convolution layer
         self.conv = build_from_cfg(
             dict(type='Conv2d') if conv_cfg is None else conv_cfg,
@@ -158,22 +158,22 @@ class ConvModule(nn.Module):
         # self.output_padding = self.conv.output_padding
         self.groups = self.conv.groups
 
-        if self.with_spectral_norm:
+        if self.with_spectral_norm: # default 
             self.conv = nn.utils.spectral_norm(self.conv)
 
         # build normalization layers
         if self.with_norm:
             # norm layer is after conv layer
             if order.index('norm') > order.index('conv'):
-                norm_channels = out_channels
+                norm_channels = out_channels #norm_layer(out_channels),out_channels 是convlayer的输出通道
             else:
                 norm_channels = in_channels
             if norm_cfg.get("type","BN") == "GN":
                 self.gn = build_from_cfg(norm_cfg, BRICKS,num_channels=norm_channels)
-                self.norm = "gn"
+                self.norm = 'gn' # 这部分代码似乎有问题,可能应该是 self.gn,或者是setattr(self.norm,'gn',self.gn)
             else:
                 self.bn = build_from_cfg(norm_cfg, BRICKS,in_channels=norm_channels)
-                self.norm = "bn"
+                self.norm = 'bn' 
         else:
             self.norm = "None"
 
@@ -216,7 +216,7 @@ class ConvModule(nn.Module):
                     x = self.padding_layer(x)
                 x = self.conv(x)
             elif layer == 'norm' and norm and self.with_norm:
-                x = getattr(self,self.norm)(x)
+                x = getattr(self,self.norm)(x)   # 此处可能是x = self.norm(x)
             elif layer == 'act' and activate and self.with_activation:
                 x = self.activate(x)
         return x

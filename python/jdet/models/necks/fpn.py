@@ -79,17 +79,17 @@ class FPN(nn.Module):
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.num_ins = len(in_channels)
-        self.num_outs = num_outs
+        self.num_outs = num_outs #输出尺度数量
         self.relu_before_extra_convs = relu_before_extra_convs
         self.no_norm_on_lateral = no_norm_on_lateral
         self.upsample_cfg = upsample_cfg.copy()
         self.upsample_div_factor = upsample_div_factor
-        if end_level == -1:
+        if end_level == -1:  #  默认是到主干网络最后一层
             self.backbone_end_level = self.num_ins
             assert num_outs >= self.num_ins - start_level
         else:
             # if end_level < inputs, no extra level is allowed
-            self.backbone_end_level = end_level
+            self.backbone_end_level = end_level # 不是最后一层时，end_level
             assert end_level <= len(in_channels)
             assert num_outs == end_level - start_level
         self.start_level = start_level

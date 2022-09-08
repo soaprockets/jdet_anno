@@ -88,26 +88,32 @@ class S2ANetHead(nn.Module):
         super(S2ANetHead, self).__init__()
         self.num_classes = num_classes
         self.in_channels = in_channels
-        self.feat_channels = feat_channels
+        self.feat_channels = feat_channels # the channel of feature map
         self.stacked_convs = stacked_convs
         self.with_orconv = with_orconv
         self.anchor_scales = anchor_scales
         self.anchor_ratios = anchor_ratios
         self.anchor_strides = anchor_strides
         self.anchor_base_sizes = list(
-            anchor_strides) if anchor_base_sizes is None else anchor_base_sizes
+            anchor_strides) if anchor_base_sizes is None else anchor_base_sizes #默认anchor_base_sizes 由传递进来的anchor_strides赋值
         self.target_means = target_means
         self.target_stds = target_stds
 
-        self.use_sigmoid_cls = loss_odm_cls.get('use_sigmoid', False)
+        self.use_sigmoid_cls = loss_odm_cls.get('use_sigmoid', False) 
         self.sampling = loss_odm_cls['type'] not in ['FocalLoss', 'GHMC']
-        if self.use_sigmoid_cls:
-            self.cls_out_channels = num_classes - 1
+        if self.use_sigmoid_cls: 
+            self.cls_out_channels = num_classes - 1 #如果使用sigmoid损失分类就是一般的二分类问题，输出结果只有一个，就是num_classes-1,多分类问题使用交叉熵损失或者其他。
         else:
             self.cls_out_channels = num_classes
 
         if self.cls_out_channels <= 0:
             raise ValueError('num_classes={} is too small'.format(num_classes))
+        
+        """
+        register related loss 
+        FAM 特征对齐模块损失，包含分类和bbox定位
+        ODM 旋转检测模块损失，
+        """
         self.loss_fam_cls = build_from_cfg(loss_fam_cls,LOSSES)
         self.loss_fam_bbox = build_from_cfg(loss_fam_bbox,LOSSES)
         self.loss_odm_cls = build_from_cfg(loss_odm_cls,LOSSES)
@@ -118,7 +124,7 @@ class S2ANetHead(nn.Module):
 
         self.anchor_generators = []
         for anchor_base in self.anchor_base_sizes:
-            self.anchor_generators.append(AnchorGeneratorRotatedS2ANet(anchor_base, anchor_scales, anchor_ratios))
+            self.anchor_generators.append(AnchorGeneratorRotatedS2ANet(anchor_base, anchor_scales, anchor_ratios))# 传递三个参数，size,缩放因子，高宽比
 
         # anchor cache
         self.base_anchors = dict()
@@ -126,10 +132,10 @@ class S2ANetHead(nn.Module):
 
     def _init_layers(self):
         self.relu = nn.ReLU()
-        self.fam_reg_convs = nn.ModuleList()
-        self.fam_cls_convs = nn.ModuleList()
-        for i in range(self.stacked_convs):
-            chn = self.in_channels if i == 0 else self.feat_channels
+        self.fam_reg_convs = nn.ModuleList() #FAM回归卷积
+        self.fam_cls_convs = nn.ModuleList() #FAM分类卷积层
+        for i in range(self.stacked_convs): # s
+            chn = self.in_channels if i == 0 else self.feat_channels # 第一层使用input channels,后续使用feature channels
             self.fam_reg_convs.append(
                 ConvModule(
                     chn,

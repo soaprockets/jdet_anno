@@ -12,14 +12,14 @@ class AnchorGeneratorRotatedS2ANet:
         self.ratios = jt.array(ratios)
         self.angles = jt.array(angles)
         self.scale_major = scale_major
-        self.ctr = ctr
+        self.ctr = ctr #中心点坐标
         self.base_anchors = self.gen_base_anchors()
 
     @property
     def num_base_anchors(self):
-        return self.base_anchors.size(0)
+        return self.base_anchors.size(0) #表示base_anchors的数量
 
-    def gen_base_anchors(self):
+    def gen_base_anchors(self): #base_size=(h,w)
         w = self.base_size
         h = self.base_size
         if self.ctr is None:
@@ -27,9 +27,9 @@ class AnchorGeneratorRotatedS2ANet:
             y_ctr = 0.5 * (h - 1)
         else:
             x_ctr, y_ctr = self.ctr
-
-        h_ratios = jt.sqrt(self.ratios)
-        w_ratios = 1 / h_ratios
+        # 推出高宽比
+        h_ratios = jt.sqrt(self.ratios) #eg: h_ratios=2^(1/2)
+        w_ratios = 1 / h_ratios # 
         assert self.scale_major, "AnchorGeneratorRotated only support scale-major anchors!"
 
         ws = (w * w_ratios[:, None, None] * self.scales[None, :, None] *
@@ -43,29 +43,29 @@ class AnchorGeneratorRotatedS2ANet:
         x_ctr += jt.zeros_like(ws)
         y_ctr += jt.zeros_like(ws)
         base_anchors = jt.stack(
-            [x_ctr, y_ctr, ws, hs, angles], dim=-1)
+            [x_ctr, y_ctr, ws, hs, angles], dim=-1) # 按照单个元素进行叠加
 
         return base_anchors
-
+    # 生成网格采样点
     def _meshgrid(self, x, y, row_major=True):
-        xx = x.repeat(len(y))
-        yy = y.view(-1, 1).repeat(1, len(x)).view(-1)
+        xx = x.repeat(len(y))  # xx.shape=len(x)*len(y)的行向量，x.repeat(num)只有一个参数时，表示x数组整体重复num次,类似List*num重复采样的操作
+        yy = y.view(-1, 1).repeat(1, len(x)).view(-1)  #repeat(a,b) a表示行复制a倍，b表示列复制b倍  view(-1,1)中-1表示可变的行数，类似renshape(-1,1)，view(-1) 默认转成可变行数的行向量
         if row_major:
-            return xx, yy
+            return xx, yy 
         else:
             return yy, xx
 
     def grid_anchors(self, featmap_size, stride=16):
         # featmap_size*stride project it to original area
-        base_anchors = self.base_anchors
+        base_anchors = self.base_anchors # [x_ctr,y_ctr,ws,hs,angles] 
 
         feat_h, feat_w = featmap_size
-        shift_x = jt.arange(0, feat_w) * stride
+        shift_x = jt.arange(0, feat_w) * stride # 按步长采样生成x坐标采样点
         shift_y = jt.arange(0, feat_h) * stride
-        shift_xx, shift_yy = self._meshgrid(shift_x, shift_y)
+        shift_xx, shift_yy = self._meshgrid(shift_x, shift_y) #返回len(x)*len(y)个网格采样点坐标，xx,yy都是行向量
         shift_others = jt.zeros_like(shift_xx)
         shifts = jt.stack(
-            [shift_xx, shift_yy, shift_others, shift_others, shift_others], dim=-1)
+            [shift_xx, shift_yy, shift_others, shift_others, shift_others], dim=-1) #表示按照单个元素组合叠加，dim=0是矩阵叠加，dim=1是矩阵的每一行叠加。
         shifts = shifts.cast(base_anchors.dtype)
         # first feat_w elements correspond to the first row of shifts
         # add A anchors (1, A, 5) to K shifts (K, 1, 5) to get

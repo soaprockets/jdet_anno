@@ -22,7 +22,7 @@ class Registry:
 
 
 def build_from_cfg(cfg,registry,**kwargs):
-    if isinstance(cfg,str):
+    if isinstance(cfg,str): #如果registry是个str，后面就不需要增加**kwargs这个字典型可变参数
         return registry.get(cfg)(**kwargs)
     elif isinstance(cfg,dict):
         args = cfg.copy()

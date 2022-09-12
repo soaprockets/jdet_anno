@@ -134,7 +134,7 @@ class S2ANetHead(nn.Module):
         self.relu = nn.ReLU()
         self.fam_reg_convs = nn.ModuleList() #FAM回归卷积
         self.fam_cls_convs = nn.ModuleList() #FAM分类卷积层
-        for i in range(self.stacked_convs): # s
+        for i in range(self.stacked_convs): # stacked_convs=2
             chn = self.in_channels if i == 0 else self.feat_channels # 第一层使用input channels,后续使用feature channels
             self.fam_reg_convs.append(
                 ConvModule(
@@ -159,17 +159,17 @@ class S2ANetHead(nn.Module):
 
         if self.with_orconv:
             self.or_conv = ORConv2d(self.feat_channels, int(
-                self.feat_channels / 8), kernel_size=3, padding=1, arf_config=(1, 8))
+                self.feat_channels / 8), kernel_size=3, padding=1, arf_config=(1, 8)) # 此模块暂时没看懂
         else:
             self.or_conv = nn.Conv2d(
                 self.feat_channels, self.feat_channels, 3, padding=1)
-        self.or_pool = RotationInvariantPooling(256, 8)
+        self.or_pool = RotationInvariantPooling(256, 8)  # conv2d,batchnorm2d
 
         self.odm_reg_convs = nn.ModuleList()
         self.odm_cls_convs = nn.ModuleList()
-        for i in range(self.stacked_convs):
+        for i in range(self.stacked_convs):# stacked_convs =2
             chn = int(self.feat_channels /
-                      8) if i == 0 and self.with_orconv else self.feat_channels
+                      8) if i == 0 and self.with_orconv else self.feat_channels 
             self.odm_reg_convs.append(
                 ConvModule(
                     self.feat_channels,
@@ -179,15 +179,15 @@ class S2ANetHead(nn.Module):
                     padding=1))
             self.odm_cls_convs.append(
                 ConvModule(
-                    chn,
+                    chn, # 第一层odm_cls_convs且使用ORconv2d时，chn=feat_channels/8,第二层使用feat_channels
                     self.feat_channels,
                     3,
                     stride=1,
-                    padding=1))
+                    padding=1)) #default order: conv2d,batchnorm_2d,activate_layer
 
         self.odm_cls = nn.Conv2d(
-            self.feat_channels, self.cls_out_channels, 3, padding=1)
-        self.odm_reg = nn.Conv2d(self.feat_channels, 5, 3, padding=1)
+            self.feat_channels, self.cls_out_channels, 3, padding=1) #最后的分类层
+        self.odm_reg = nn.Conv2d(self.feat_channels, 5, 3, padding=1) # 最终的回归层，predict=(x_ctr,y_ctr,w,h,angle)
 
         self.init_weights()
 
@@ -198,7 +198,7 @@ class S2ANetHead(nn.Module):
             normal_init(m.conv, std=0.01)
         bias_cls = bias_init_with_prob(0.01)
         normal_init(self.fam_reg, std=0.01)
-        normal_init(self.fam_cls, std=0.01, bias=bias_cls)
+        normal_init(self.fam_cls, std=0.01, bias=bias_cls) # 概率分布初始化bias
 
         self.align_conv.init_weights()
 
@@ -210,7 +210,7 @@ class S2ANetHead(nn.Module):
         normal_init(self.odm_cls, std=0.01, bias=bias_cls)
         normal_init(self.odm_reg, std=0.01)
 
-    def forward_single(self, x, stride):
+    def forward_single(self, x, stride): #单次前向传播
         fam_reg_feat = x
         for fam_reg_conv in self.fam_reg_convs:
             fam_reg_feat = fam_reg_conv(fam_reg_feat)
@@ -256,7 +256,9 @@ class S2ANetHead(nn.Module):
         odm_bbox_pred = self.odm_reg(odm_reg_feat)
 
         return fam_cls_score, fam_bbox_pred, refine_anchor, odm_cls_score, odm_bbox_pred
-
+    """
+    得到初始的anchors
+    """
     def get_init_anchors(self,
                          featmap_sizes,
                          img_metas):
@@ -288,13 +290,16 @@ class S2ANetHead(nn.Module):
                 anchor_stride = self.anchor_strides[i]
                 feat_h, feat_w = featmap_sizes[i]
                 w,h = img_meta['pad_shape'][:2]
-                valid_feat_h = min(int(np.ceil(h / anchor_stride)), feat_h)
+                valid_feat_h = min(int(np.ceil(h / anchor_stride)), feat_h) # np.ceil向上取整
                 valid_feat_w = min(int(np.ceil(w / anchor_stride)), feat_w)
                 flags = self.anchor_generators[i].valid_flags((feat_h, feat_w), (valid_feat_h, valid_feat_w))
                 multi_level_flags.append(flags)
-            valid_flag_list.append(multi_level_flags)
+            valid_flag_list.append(multi_level_flags) #list.append(list)
         return anchor_list, valid_flag_list
-
+    
+    """
+    得到细化微调的anchors 
+    """
     def get_refine_anchors(self,
                            featmap_sizes,
                            refine_anchors,
@@ -311,6 +316,7 @@ class S2ANetHead(nn.Module):
             refine_anchors_list.append(mlvl_refine_anchors)
 
         valid_flag_list = []
+        #旨在训练阶段计算valid_flag，推理阶段不做计算
         if is_train:
             for img_id, img_meta in enumerate(img_metas):
                 multi_level_flags = []
@@ -347,7 +353,7 @@ class S2ANetHead(nn.Module):
         # concat all level anchors and flags to a single tensor
         concat_anchor_list = []
         for i in range(len(anchor_list)):
-            concat_anchor_list.append(jt.contrib.concat(anchor_list[i]))
+            concat_anchor_list.append(jt.contrib.concat(anchor_list[i])) #jt.contrib 是jittor中还没有完善的贡献代码
         all_anchor_list = images_to_levels(concat_anchor_list,num_level_anchors)
 
         # Feature Alignment Module

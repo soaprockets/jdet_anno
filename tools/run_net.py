@@ -8,7 +8,7 @@ def main():
     parser = argparse.ArgumentParser(description="Jittor Object Detection Training")
     parser.add_argument(
         "--config-file",
-        default="/home/JDet/configs/s2anet/s2anet_r50_fpn_1x_fair1m_1_5.py",
+        default="/home/hexf/data/jdet_anno/configs/s2anet/s2anet_r50_fpn_1x_fair1m_1_5.py",
         metavar="FILE",
         help="path to config file",
         type=str,
@@ -27,7 +27,7 @@ def main():
 
     parser.add_argument(
         "--save_dir",
-        default="/root/autodl-tmp",
+        default="/home/hexf/data/jdet_anno",
         type=str,
     )
     

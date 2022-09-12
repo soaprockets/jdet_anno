@@ -142,7 +142,7 @@ class S2ANetHead(nn.Module):
                     self.feat_channels,
                     3,
                     stride=1,
-                    padding=1))
+                    padding=1)) # input_channel,output_channel,kernel_size,stride,padding
             self.fam_cls_convs.append(
                 ConvModule(
                     chn,
@@ -151,8 +151,8 @@ class S2ANetHead(nn.Module):
                     stride=1,
                     padding=1))
 
-        self.fam_reg = nn.Conv2d(self.feat_channels, 5, 1)
-        self.fam_cls = nn.Conv2d(self.feat_channels, self.cls_out_channels, 1)
+        self.fam_reg = nn.Conv2d(self.feat_channels, 5, 1) # predict bbox[x_ctr,y_ctr,w,h,angles]
+        self.fam_cls = nn.Conv2d(self.feat_channels, self.cls_out_channels, 1) #predict the categories of objects
 
         self.align_conv = AlignConv(
             self.feat_channels, self.feat_channels, kernel_size=3)
@@ -672,7 +672,7 @@ class AlignConv(nn.Module):
         self.deform_conv = DeformConv(in_channels,
                                       out_channels,
                                       kernel_size=kernel_size,
-                                      padding=(kernel_size - 1) // 2,
+                                      padding=(kernel_size - 1) // 2, # 保证output与input的高宽一致
                                       deformable_groups=deformable_groups)
         self.relu = nn.ReLU()
 

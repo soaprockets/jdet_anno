@@ -70,8 +70,7 @@ class AnchorGeneratorRotatedS2ANet:
         # first feat_w elements correspond to the first row of shifts
         # add A anchors (1, A, 5) to K shifts (K, 1, 5) to get
         # shifted anchors (K, A, 5), reshape to (K*A, 5)
-
-        all_anchors = base_anchors[None, :, :] + shifts[:, None, :]
+        all_anchors = base_anchors[None, :, :] + shifts[:, None, :] 
         all_anchors = all_anchors.view(-1, 5)
         # first A rows correspond to A anchors of (0, 0) in feature map,
         # then (0, 1), (0, 2), ...

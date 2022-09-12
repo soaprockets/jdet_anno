@@ -115,7 +115,3 @@ class ImageDataset(Dataset):
         return batch_imgs,anns 
 
 
-if __name__ ="__main__":
-"""
-demo code
-"""

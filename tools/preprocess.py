@@ -13,16 +13,22 @@ from jdet.data.devkits.ssdd_to_dota import ssdd_to_dota  #jdet.data.devkits下�
 
 def clear(cfg):
     if is_win():
-        """windows系统下使用shutil.retree删除文件目录及其下所有文件"""
+        """
+        windows系统下使用shutil.retree删除文件目录及其下所有文件
+        """
         shutil.rmtree(os.path.join(cfg.source_dataset_path, 'trainval'),ignore_errors=True)
         shutil.rmtree(os.path.join(cfg.target_dataset_path),ignore_errors=True)
     else:
-        """ linux 系统下使用rm -rf 删除文件目录及其下所有文件 """
+        """ 
+        linux 系统下使用rm -rf 删除文件目录及其下所有文件
+         """
         os.system(f"rm -rf {os.path.join(cfg.source_dataset_path, 'trainval')}")
         os.system(f"rm -rf {os.path.join(cfg.target_dataset_path)}")
 
 def run(cfg):
-    """根据输入的数据类型指定相应的转换分支，当前预处理的数据集类型为fair1m_1_5"""
+    """
+    根据输入的数据类型指定相应的转换分支，当前预处理的数据集类型为fair1m_1_5
+    """
      # SSDD及SSDD+为舰船检测数据集
     if cfg.type=='SSDD+' or cfg.type=='SSDD':
         for task in cfg.convert_tasks:
@@ -88,7 +94,9 @@ def run(cfg):
         vertical_flip=False if cfg_.vertical_flip is None else cfg_.vertical_flip
         rotation_angles=[0.] if cfg_.rotation_angles is None else cfg_.rotation_angles
         
-        """ 遥感图无法进行旋转，翻转等操作，否则对应的bbox的坐标也需要进行相应的变换 """
+        """ 
+        遥感图无法进行旋转，翻转等操作，否则对应的bbox的坐标也需要进行相应的变换 
+        """
         assert(rotation_angles == [0.]) #TODO support multi angles
         assert(horizontal_flip == False) #TODO support horizontal_flip
         assert(vertical_flip == False) #TODO support vertical_flip
@@ -104,13 +112,17 @@ def run(cfg):
             os.makedirs(out_label_path,exist_ok=True)
             # TODO support Windows etc.
             if is_win():
-                """windows下使用shutil.copytree拷贝整个文件目录及其下的所有文件到指定目录"""
+                """
+                windows下使用shutil.copytree拷贝整个文件目录及其下的所有文件到指定目录
+                """
                 shutil.copytree(os.path.join(cfg.source_dataset_path, 'train', 'images'),out_img_path,dirs_exist_ok=True) 
                 shutil.copytree(os.path.join(cfg.source_dataset_path, 'val', 'images'),out_img_path,dirs_exist_ok=True)
                 shutil.copytree(os.path.join(cfg.source_dataset_path, 'train', 'labelTxt'),out_label_path,dirs_exist_ok=True)
                 shutil.copytree(os.path.join(cfg.source_dataset_path, 'val', 'labelTxt'),out_label_path,dirs_exist_ok=True)
             else:
-                """linux下使用cp拷贝整个文件目录及其下的所有文件到指定目录"""
+                """
+                linux下使用cp拷贝整个文件目录及其下的所有文件到指定目录
+                """
                 os.system(f"cp {os.path.join(cfg.source_dataset_path, 'train', 'images', '*')} {out_img_path}")
                 os.system(f"cp {os.path.join(cfg.source_dataset_path, 'val', 'images', '*')} {out_img_path}")
                 os.system(f"cp {os.path.join(cfg.source_dataset_path, 'train', 'labelTxt', '*')} {out_label_path}")
@@ -127,7 +139,7 @@ def main():
     parser = argparse.ArgumentParser(description="Jittor DOTA data preprocess")
     parser.add_argument(
         "--config-file",
-        default="",
+        default="/home/hexf/data/jdet_anno/configs/preprocess/fair1m_1_5_preprocess_config.py",
         metavar="FILE",
         help="path to config file",
         type=str,

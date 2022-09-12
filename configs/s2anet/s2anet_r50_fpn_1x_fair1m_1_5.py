@@ -1,5 +1,5 @@
 # {DATASET_PATH}
-dataset_root = '/root/autodl-tmp/dataset'
+dataset_root = '/home/hexf/data/dataset/remote_det'
 # model settings
 model = dict(
     type='S2ANet',

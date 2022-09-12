@@ -1,7 +1,7 @@
 type='FAIR1M_1_5'
-source_fair_dataset_path='/root/autodl-tmp/dataset/data'
-source_dataset_path='/root/autodl-tmp/dataset/dota'
-target_dataset_path='/root/autodl-tmp/dataset/preprocessed'
+source_fair_dataset_path='/home/hexf/data/dataset/remote_det/data'
+source_dataset_path='/home/hexf/data/dataset/remote_det/dota'
+target_dataset_path='/home/hexf/data/dataset/remote_det/preprocessed'
 convert_tasks=['train','test']
 
 # available labels: train, val, test, trainval

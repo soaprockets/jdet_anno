@@ -100,7 +100,7 @@ class ConvModule(nn.Module):
                  groups=1,
                  bias='auto',
                  conv_cfg=None,
-                 norm_cfg=None,
+                 norm_cfg=dict(type="BN"), # default=None,此部分修改是为了测试conv_module关于norm_layer定义部分代码的测试
                  act_cfg=dict(type='ReLU'),
                  with_spectral_norm=False,
                  padding_mode='zeros',

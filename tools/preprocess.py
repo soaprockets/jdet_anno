@@ -29,6 +29,9 @@ def run(cfg):
     """
     根据输入的数据类型指定相应的转换分支，当前预处理的数据集类型为fair1m_1_5
     """
+    
+    
+    
      # SSDD及SSDD+为舰船检测数据集
     if cfg.type=='SSDD+' or cfg.type=='SSDD':
         for task in cfg.convert_tasks:
@@ -64,12 +67,12 @@ def run(cfg):
         return
     """ """
 
-    if (cfg.type=='FAIR' or cfg.type=='FAIR1M_1_5'):
-        for task in cfg.convert_tasks:
-            print('==============')
-            print("convert to dota:", task)
-            fair_to_dota(os.path.join(cfg.source_fair_dataset_path, task), os.path.join(cfg.source_dataset_path, task))
-
+    # if (cfg.type=='FAIR' or cfg.type=='FAIR1M_1_5'):
+        # for task in cfg.convert_tasks:
+        #     print('==============')
+        #     print("convert to dota:", task)
+        #     fair_to_dota(os.path.join(cfg.source_fair_dataset_path, task), os.path.join(cfg.source_dataset_path, task))
+# 针对一般数据集转换
     for task in cfg.tasks:
         label = task.label #获取train，test两个标签值
         cfg_ = task.config
@@ -139,7 +142,7 @@ def main():
     parser = argparse.ArgumentParser(description="Jittor DOTA data preprocess")
     parser.add_argument(
         "--config-file",
-        default="/home/hexf/data/jdet_anno/configs/preprocess/fair1m_1_5_preprocess_config.py",
+        default="/home/hexf/data/jdet_anno/configs/preprocess/dota_preprocess_config.py",
         metavar="FILE",
         help="path to config file",
         type=str,
@@ -148,7 +151,7 @@ def main():
         "--clear",
         default=False,
         action='store_true'
-    )
+    ) 
     args = parser.parse_args()
     if args.config_file:
         init_cfg(args.config_file)

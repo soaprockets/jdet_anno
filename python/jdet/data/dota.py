@@ -150,13 +150,13 @@ class DOTADataset(CustomDataset):
         return aps
             
             
-def test_eval():
-    results= jt.load("projects/s2anet/work_dirs/s2anet_r50_fpn_1x_dota/detections/val_0/val.pkl")
-    results = jt.load("projects/s2anet/work_dirs/s2anet_r50_fpn_1x_dota/detections/val_rotate_balance/val.pkl")
-    # results = results
-    dataset = DOTADataset(annotations_file='/mnt/disk/lxl/dataset/DOTA_1024/trainval_split/trainval1024.pkl',
-        images_dir='/mnt/disk/lxl/dataset/DOTA_1024/trainval_split/images/')
-    dataset.evaluate(results,None,None,save=False)
+# def test_eval():
+#     results= jt.load("projects/s2anet/work_dirs/s2anet_r50_fpn_1x_dota/detections/val_0/val.pkl")
+#     results = jt.load("projects/s2anet/work_dirs/s2anet_r50_fpn_1x_dota/detections/val_rotate_balance/val.pkl")
+#     # results = results
+#     dataset = DOTADataset(annotations_file='/mnt/disk/lxl/dataset/DOTA_1024/trainval_split/trainval1024.pkl',
+#         images_dir='/mnt/disk/lxl/dataset/DOTA_1024/trainval_split/images/')
+#     dataset.evaluate(results,None,None,save=False)
     
     # data = []
     # for result,target in results:
@@ -167,5 +167,5 @@ def test_eval():
 
 
 
-if __name__ == "__main__":
-    test_eval()
+# if __name__ == "__main__":
+#     test_eval()

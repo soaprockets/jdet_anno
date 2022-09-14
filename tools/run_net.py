@@ -1,6 +1,7 @@
 import argparse
 import jittor as jt
 jt.flags.use_cuda_managed_allocator=1
+jt.cudnn.set_max_workspace_ratio(0.0)
 from jdet.runner import Runner 
 from jdet.config import init_cfg
 from time import time
@@ -8,7 +9,7 @@ def main():
     parser = argparse.ArgumentParser(description="Jittor Object Detection Training")
     parser.add_argument(
         "--config-file",
-        default="/home/hexf/data/jdet_anno/configs/s2anet/s2anet_r50_fpn_1x_fair1m_1_5.py",
+        default="/home/hexf/data/jdet_anno/configs/oriented_rcnn_r50_fpn_1x_fair1_with_flip.py",
         metavar="FILE",
         help="path to config file",
         type=str,
@@ -27,7 +28,7 @@ def main():
 
     parser.add_argument(
         "--save_dir",
-        default="/home/hexf/data/jdet_anno",
+        default="/home/hexf/data/jdet_result/oriented_rcnn",
         type=str,
     )
     

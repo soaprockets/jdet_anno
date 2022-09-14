@@ -1,4 +1,4 @@
-
+dataset_root = '/home/hexf/data/dataset/processed_fair1m_to_dota'
 # model settings
 model = dict(
     type='OrientedRCNN',
@@ -11,7 +11,7 @@ model = dict(
         type='FPN',
         in_channels=[256, 512, 1024, 2048],
         out_channels=256,
-        num_outs=5), # Oriented RCNN 使用的FPN的 P2,P3,P4,P5,P6
+        num_outs=5),
     rpn = dict(
         type = "OrientedRPNHead",
         in_channels=256,
@@ -109,26 +109,15 @@ model = dict(
 
 dataset = dict(
     train=dict(
-        type="DOTADataset",
-        dataset_dir='/home/hexf/data/dataset/remote_det/preprocessed/train_1024_200_1.0',
+        type="FAIR1M_1_5_Dataset",
+        dataset_dir=f'{dataset_root}/train_1024_200_1.0',
         transforms=[
             dict(
                 type="RotatedResize",
                 min_size=1024,
                 max_size=1024
             ),
-            dict(
-                type='RotatedRandomFlip',
-                direction="horizontal",
-                prob=0.5),
-            dict(
-                type='RotatedRandomFlip', 
-                direction="vertical",
-                prob=0.5),
-            # dict(
-            #     type="RandomRotateAug",
-            #     random_rotate_on=True,
-            # ),
+            dict(type='RotatedRandomFlip', prob=0.5),
             dict(
                 type = "Pad",
                 size_divisor=32),
@@ -139,15 +128,14 @@ dataset = dict(
                 to_bgr=False,)
             
         ],
-        batch_size=2,
+        batch_size=1,
         num_workers=4,
         shuffle=True,
-        filter_empty_gt=False,
-        balance_category=False
+        filter_empty_gt=False
     ),
     val=dict(
-        type="DOTADataset",
-        dataset_dir='/home/hexf/data/dataset/remote_det/preprocessed/train_1024_200_1.0',
+        type="FAIR1M_1_5_Dataset",
+        dataset_dir=f'{dataset_root}/train_1024_200_1.0',
         transforms=[
             dict(
                 type="RotatedResize",
@@ -161,22 +149,22 @@ dataset = dict(
                 type = "Normalize",
                 mean =  [123.675, 116.28, 103.53],
                 std = [58.395, 57.12, 57.375],
-                to_bgr=False,),
+                to_bgr=False),
         ],
-        batch_size=2,
+        batch_size=1,
         num_workers=4,
         shuffle=False
     ),
     test=dict(
         type="ImageDataset",
-        images_dir='/home/hexf/data/dataset/remote_det/preprocessed/test_1024_200_1.0/images',
+        images_dir=f'{dataset_root}/test_1024_200_1.0/images',
         transforms=[
             dict(
                 type="RotatedResize",
                 min_size=1024,
                 max_size=1024
             ),
-            dict(   
+            dict(
                 type = "Pad",
                 size_divisor=32),
             dict(
@@ -185,10 +173,14 @@ dataset = dict(
                 std = [58.395, 57.12, 57.375],
                 to_bgr=False,),
         ],
+        dataset_type="FAIR1M_1_5",
         num_workers=4,
         batch_size=1,
     )
 )
+
+
+
 
 optimizer = dict(type='SGD',  lr=0.005, momentum=0.9, weight_decay=0.0001, grad_clip=dict(max_norm=35, norm_type=2))
 

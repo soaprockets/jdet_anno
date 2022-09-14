@@ -214,7 +214,7 @@ def get_classes_by_name(name):
         'COCO':     COCO_CLASSES,
         'CITYSCAPE':CITYSCAPE_CLASSES,
         'IMAGENET': IMAGENET_CLASSES,
-        'DOTA':     DOTA1_CLASSES,
+        'DOTA':     FAIR1M_1_5_CLASSES, #暂时修改为
         'DOTA1':    DOTA1_CLASSES,
         'DOTA1_5':  DOTA1_5_CLASSES,
         'DOTA2':    DOTA2_CLASSES,

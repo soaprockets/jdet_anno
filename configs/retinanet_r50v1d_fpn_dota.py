@@ -19,7 +19,7 @@ model = dict(
         relu_before_extra_convs= True),
     rpn_net = dict(
         type= "RetinaHead",
-        n_class= 15,
+        n_class= 11,
         in_channels= 256,
         stacked_convs= 4,
         mode= "R",
@@ -39,39 +39,22 @@ model = dict(
           angles= [-90, -75, -60, -45, -30, -15],
           mode= "H")),
 )
+
+dataset_root = '/home/hexf/data/dataset/processed_fair1m_to_dota'
 dataset = dict(
-    val=dict(
-        type="DOTADataset",
-        dataset_dir="/home/cxjyxx_me/workspace/JAD/datasets/processed_DOTA/trainval_600_150_1.0",
-        transforms=[
-            dict(
-                type="RotatedResize",
-                min_size=800,
-                max_size=800
-            ),
-            dict(
-                type = "Normalize",
-                mean =  [123.675, 116.28, 103.53],
-                std = [58.395, 57.12, 57.375],
-                to_bgr=False,)
-        ],
-        batch_size=4,
-        num_workers=4,
-        shuffle=False
-    ),
     train=dict(
-        type="DOTADataset",
-        dataset_dir="/home/cxjyxx_me/workspace/JAD/datasets/processed_DOTA/trainval_600_150_1.0",
+        type="FAIR1M_1_5_Dataset",
+        dataset_dir=f'{dataset_root}/train_1024_200_1.0',
         transforms=[
             dict(
                 type="RotatedResize",
-                min_size=800,
-                max_size=800
+                min_size=1024,
+                max_size=1024
             ),
+            dict(type='RotatedRandomFlip', prob=0.5),
             dict(
-                type='RotatedRandomFlip', 
-                prob=0.5,
-                direction='horizontal'),
+                type = "Pad",
+                size_divisor=32),
             dict(
                 type = "Normalize",
                 mean =  [123.675, 116.28, 103.53],
@@ -79,26 +62,119 @@ dataset = dict(
                 to_bgr=False,)
             
         ],
-        batch_size=3, 
+        batch_size=2,
         num_workers=4,
-        shuffle= True
+        shuffle=True,
+        filter_empty_gt=False
     ),
-    test = dict(
-      type= "ImageDataset",
-      images_dir= "/mnt/disk/flowey/dataset/processed_DOTA/test_600_150_1.0/images",
-      transforms= [
-        dict(
-          type= "RotatedResize",
-          min_size= 800,
-          max_size= 800),
-        dict(
-          type= "Normalize",
-          mean=  [123.675, 116.28, 103.53],
-          std= [58.395, 57.12, 57.375],
-          to_bgr= False)
-      ],
-      num_workers= 4,
-      batch_size= 32))
+    val=dict(
+        type="FAIR1M_1_5_Dataset",
+        dataset_dir=f'{dataset_root}/train_1024_200_1.0',
+        transforms=[
+            dict(
+                type="RotatedResize",
+                min_size=1024,
+                max_size=1024
+            ),
+            dict(
+                type = "Pad",
+                size_divisor=32),
+            dict(
+                type = "Normalize",
+                mean =  [123.675, 116.28, 103.53],
+                std = [58.395, 57.12, 57.375],
+                to_bgr=False),
+        ],
+        batch_size=2,
+        num_workers=4,
+        shuffle=False
+    ),
+    test=dict(
+        type="ImageDataset",
+        images_dir=f'{dataset_root}/test_1024_200_1.0/images',
+        transforms=[
+            dict(
+                type="RotatedResize",
+                min_size=1024,
+                max_size=1024
+            ),
+            dict(
+                type = "Pad",
+                size_divisor=32),
+            dict(
+                type = "Normalize",
+                mean =  [123.675, 116.28, 103.53],
+                std = [58.395, 57.12, 57.375],
+                to_bgr=False,),
+        ],
+        dataset_type="FAIR1M_1_5",
+        num_workers=4,
+        batch_size=1,
+    )
+)
+
+
+
+# dataset = dict(
+#     val=dict(
+#         type="DOTADataset",
+#         dataset_dir="/home/cxjyxx_me/workspace/JAD/datasets/processed_DOTA/trainval_600_150_1.0",
+#         transforms=[
+#             dict(
+#                 type="RotatedResize",
+#                 min_size=800,
+#                 max_size=800
+#             ),
+#             dict(
+#                 type = "Normalize",
+#                 mean =  [123.675, 116.28, 103.53],
+#                 std = [58.395, 57.12, 57.375],
+#                 to_bgr=False,)
+#         ],
+#         batch_size=4,
+#         num_workers=4,
+#         shuffle=False
+#     ),
+#     train=dict(
+#         type="DOTADataset",
+#         dataset_dir="/home/cxjyxx_me/workspace/JAD/datasets/processed_DOTA/trainval_600_150_1.0",
+#         transforms=[
+#             dict(
+#                 type="RotatedResize",
+#                 min_size=800,
+#                 max_size=800
+#             ),
+#             dict(
+#                 type='RotatedRandomFlip', 
+#                 prob=0.5,
+#                 direction='horizontal'),
+#             dict(
+#                 type = "Normalize",
+#                 mean =  [123.675, 116.28, 103.53],
+#                 std = [58.395, 57.12, 57.375],
+#                 to_bgr=False,)
+            
+#         ],
+#         batch_size=3, 
+#         num_workers=4,
+#         shuffle= True
+#     ),
+#     test = dict(
+#       type= "ImageDataset",
+#       images_dir= "/mnt/disk/flowey/dataset/processed_DOTA/test_600_150_1.0/images",
+#       transforms= [
+#         dict(
+#           type= "RotatedResize",
+#           min_size= 800,
+#           max_size= 800),
+#         dict(
+#           type= "Normalize",
+#           mean=  [123.675, 116.28, 103.53],
+#           std= [58.395, 57.12, 57.375],
+#           to_bgr= False)
+#       ],
+#       num_workers= 4,
+#       batch_size= 32))
 optimizer = dict(
     type='GradMutilpySGD', 
     lr=3 * 5e-4,

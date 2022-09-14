@@ -484,7 +484,7 @@ class OrientedHead(nn.Module):
                 sampling_results = []
 
                 for i in range(num_imgs):
-                    
+                    proposal_list[i] = jt.array(proposal_list[i],dtype=jt.int64)
                     assign_result = self.assigner.assign(proposal_list[i], target_bboxes[i], target_bboxes_ignore[i], gt_labels[i])
 
                     sampling_result = self.sampler.sample(

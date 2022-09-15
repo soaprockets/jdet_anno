@@ -55,7 +55,7 @@ model = dict(
     ),
     bbox_head=dict(
         type='OrientedHead',
-        num_classes=15,
+        num_classes=10,
         in_channels=256,
         fc_out_channels=1024,
         score_thresh=0.05,
